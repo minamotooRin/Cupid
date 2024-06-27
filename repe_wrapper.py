@@ -15,9 +15,8 @@ random.seed(42)
 #         self.tokenizer = tokenizer
 #         self.device = device
     
-    
 def get_wrapped_model(model, tokenizer, pn_pairs, layer_id, coeff, batch_size=16):
-    
+
 
     rep_token = -1
     hidden_layers = list(range(-1, -model.config.num_hidden_layers, -1))

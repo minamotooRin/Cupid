@@ -30,7 +30,8 @@ def format_llama2(msgs:list, assist_prefix:str=""):
             prompt += user_msg_template.format(user_msg=msg["user_msg"])
         elif "assistant_msg" in msg:
             prompt += assistant_msg_template.format(assistant_msg=msg["assistant_msg"])
-    if assist_prefix:
+    
+    if "user_msg" in msgs[-1]:
         prompt += f"{assist_prefix}"
          
     return prompt
@@ -66,7 +67,7 @@ def format_llama3(msgs:list, assist_prefix:str=""):
         elif "assistant_msg" in msg:
             prompt += assistant_msg_template.format(assistant_msg=msg["assistant_msg"])
 
-    if assist_prefix:
+    if "user_msg" in msgs[-1]:
         prompt += f"<|start_header_id|>assistant<|end_header_id|>\n\n{assist_prefix}"
          
     return prompt

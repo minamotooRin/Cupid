@@ -65,7 +65,7 @@ def main(
         scores = []
         
         terminate_flag = False
-        logging.info(f"Epoch: {epoch}")
+        logging.info(f" ======== Epoch: {epoch} ========")
 
         prompts_1 = [
             {
@@ -98,7 +98,7 @@ def main(
         while terminate_flag == False:
 
             epoch += 1
-            logging.info(f"Epoch: {epoch}")
+            logging.info(f"======== Epoch: {epoch} ========")
 
             prompts_1.append(
                 {
@@ -134,6 +134,8 @@ def main(
 
             if epoch == config["max_iter"]:
                 terminate_flag = True
+
+        logging.info(f"======== END IN: {epoch} ========")
         
         break # for debugging, just test one case
 
