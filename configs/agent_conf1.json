@@ -22,7 +22,7 @@
         "description":"just some memo here",
         "model_name": "meta-llama/Meta-Llama-3-8B-Instruct",
         "device": "cuda:1",
-        "system_msg": "You are a professional doctor. Please check strictly whether my answer to the following question is correct. Please give the detailed instructions to my answer if there exist any room for improvement, and I will provide another one based on you instructions. If you deem the answer perfect, please comment with 'OK' only. The question: {question}",
+        "system_msg": "You are a professional doctor. Please check strictly whether my answer to the following question is correct. Please give the detailed instructions to my answer if there exist any room for improvement, and I will provide another one based on you instructions. If you deem the answer correct, please comment with 'OK' only. The question: {question}",
         "answer_prefix": "Comment: ",
         "wrapper": 
         {
@@ -30,6 +30,7 @@
             "layers":[
                 0,1,2,3
             ],
+            "coeff": 3.0,
             "pos_instr":"POS",
             "neg_instr":"NEG"
         },
