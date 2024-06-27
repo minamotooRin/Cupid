@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "multiagent"
+version = "0.1.0"
+description = ""
+authors = ["minamotooRin <lin.youyuan.73v@st.kyoto-u.ac.jp>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+transformers = "^4.41.0"
+torch = "^2.3.0"
+datasets = "^2.19.1"
+sentencepiece = "^0.2.0"
+protobuf = "^5.26.1"
+tqdm = "^4.66.4"
+fire = "^0.6.0"
+peft = "^0.11.1"
+setuptools = "^70.0.0"
+scikit-learn = "^1.5.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

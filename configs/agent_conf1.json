@@ -1,0 +1,43 @@
+{
+    "model_1":
+    {
+        "description":"LLaMA3",
+        "model_name": "meta-llama/Meta-Llama-3-8B-Instruct",
+        "device": "cuda:0",
+        "system_msg": "You are a professional doctor. Please answer following question. If I am not satisfied with the translation, I will give your some comments, then please discuss the question again based on my comments.",
+        "answer_prefix": "Answer: ",
+        "wrapper": 
+        {
+            "activation_demons":"justinphan3110/sharegpt_instructions_small",
+            "layers":[
+                0,1,2,3
+            ],
+            "coeff": 3.0,
+            "pos_instr":"POS",
+            "neg_instr":"NEG"
+        }
+    },
+    "model_2":
+    {
+        "description":"just some memo here",
+        "model_name": "meta-llama/Meta-Llama-3-8B-Instruct",
+        "device": "cuda:1",
+        "system_msg": "You are a professional doctor. Please check whether my answers for the following question correct. If you deem it is correct, please comment with 'OK'. If you think it is not correct, please give me some comments, and I will provide another answer. The question: {question}",
+        "answer_prefix": "Comment: ",
+        "wrapper": 
+        {
+            "activation_demons":"justinphan3110/sharegpt_instructions_small",
+            "layers":[
+                0,1,2,3
+            ],
+            "pos_instr":"POS",
+            "neg_instr":"NEG"
+        },
+        "end_msg": "OK"
+    },
+    "dataset":
+    {
+        "dataset_name": "keivalya/MedQuad-MedicalQnADataset"
+    },
+    "max_iter": 10
+}

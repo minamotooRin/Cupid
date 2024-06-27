@@ -1,0 +1,9 @@
+*.bkup
+*.db
+
+log/
+legacy/
+dataset/
+eval_out/
+__pycache__/
+output/

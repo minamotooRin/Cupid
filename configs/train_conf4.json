@@ -1,0 +1,21 @@
+{
+    "model": "meta-llama/Meta-Llama-3-8B",
+    "dataset":[
+        "truehealth/liveqa"
+    ],
+    "save_dir": "./output/conf4",
+    "batch_size": 1,
+    "num_epochs": 4,
+    "instructions":[
+        "You are a medical professional. Please answer the following questions."
+    ],
+
+    "model__": "NousResearch/Llama-2-7b-hf",
+    "memo":[
+        "keivalya/MedQuad-MedicalQnADataset:                    16407 dev",
+        "Shekswess/medical_llama3_instruct_dataset_short:       2000 dev",
+        "GBaker/MedQA-USMLE-4-options:                          10178 dev 1273 test",
+        "shibing624/medical:                                    2066589 dev 1000 validataion 1000 test      Chinese",
+        "truehealth/liveqa:                                     635 dev"
+    ]
+}
