@@ -127,17 +127,12 @@ def extract_blank(output:str, assist_prefix:str=""):
     return output.strip.split("\n")[-1]
 
 model2format_func = {
-    "NousResearch/Llama-2-7b-hf": 
+    "LLaMA2": 
     {
         "encode": format_llama2,
         "decode": extract_llama2,
     },
-    "meta-llama/Meta-Llama-3-8B":
-    {
-        "encode": format_llama3,
-        "decode": extract_llama3,
-    },
-    "meta-llama/Meta-Llama-3-8B-Instruct":
+    "LLaMA3":
     {
         "encode": format_llama3,
         "decode": extract_llama3,

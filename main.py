@@ -5,6 +5,8 @@ import torch
 import json
 import logging
 import tqdm
+import random
+import numpy
 import pathlib as pl
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -23,9 +25,17 @@ def get_response(model, tokenizer, encode_func, decode_func, prompt, assist_pref
     response = decode_func(texts, assist_prefix)
     return response
 
+def seed_everything(seed):
+    torch.manual_seed(0)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    numpy.random.seed(0)
+    random.seed(0)
+
 def main(
         config_path: str = "configs/agent_conf1.json",
 ):
+    seed_everything(42)
 
     config = json.load(open(config_path, "r"))
     config_1 = config["model_1"]
@@ -36,8 +46,8 @@ def main(
         
         tokenizer = AutoTokenizer.from_pretrained(config["model_name"])
         model = AutoModelForCausalLM.from_pretrained(config["model_name"]).to(config["device"])
-        encode_func = model2format_func[config["model_name"]]["encode"]
-        decode_func = model2format_func[config["model_name"]]["decode"]
+        encode_func = model2format_func[config["template_type"]]["encode"]
+        decode_func = model2format_func[config["template_type"]]["decode"]
         # if config["wrapper"]:
         #     warp_config = config["wrapper"]
             
@@ -65,6 +75,10 @@ def main(
         scores = []
         
         terminate_flag = False
+
+        logging.info(f"Question: {question}")
+        logging.info(f"Ground Truth: {answer}")
+
         logging.info(f" ======== Epoch: {epoch} ========")
 
         prompts_1 = [
@@ -93,6 +107,7 @@ def main(
         response_2 = get_response(model_2, tokenizer_2, encode_func_2, decode_func_2, prompts_2, assist_prefix=config_2["answer_prefix"])
         if remove_extra_spaces(response_2) == config_2["end_msg"] or remove_extra_spaces(response_2) == config_2["answer_prefix"] + config_2["end_msg"]:
             terminate_flag = True
+        logging.info(f"----------------------------------")
         logging.info(f"Model 2 Output: {response_2}")
 
         while terminate_flag == False:
@@ -130,6 +145,7 @@ def main(
             if remove_extra_spaces(response_2) == config_2["end_msg"] or remove_extra_spaces(response_2) == config_2["answer_prefix"] + config_2["end_msg"]:
                 terminate_flag = True
 
+            logging.info(f"----------------------------------")
             logging.info(f"Model 2 Output: {response_2}")
 
             if epoch == config["max_iter"]:
