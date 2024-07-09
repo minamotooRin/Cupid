@@ -1,8 +1,9 @@
 {
     "model_1":
     {
-        "description":"LLaMA3",
-        "model_name": "ruslanmv/Medical-Llama3-8B",
+        "description":"just some memo here",
+        "model_name": "meta-llama/Meta-Llama-3-8B-Instruct",
+        "template_type":"LLaMA3",
         "device": "cuda:0",
         "system_msg": "You are a professional doctor. Please answer the following question concisely, academiclly and professionally. If I am not satisfied with the answer, I will give you some comments, then please answer question again based on my comments.",
         "answer_prefix": "Answer: ",
@@ -20,9 +21,10 @@
     "model_2":
     {
         "description":"just some memo here",
-        "model_name": "ruslanmv/Medical-Llama3-v2",
+        "model_name": "meta-llama/Meta-Llama-3-8B-Instruct",
+        "template_type":"LLaMA3",
         "device": "cuda:1",
-        "system_msg": "You are a professional doctor. Please check strictly whether my answer to the following question is correct. Please give the concise instructions to my answer (do not give me the revision) if there exist any room for improvement, and I will provide another one based on you instructions. Please comment with just 'OK' without any onther words only when you think my answer is no room for improvement. The question: {question}",
+        "system_msg": "You are a professional doctor. Please check strictly whether my answer to the following question is correct. Please give the concise and detailed instructions to my answer (do not give me the revision) if there exist any room for improvement, and I will provide another one based on you instructions. Please comment with just 'OK' without any onther words only when you think my answer is no room for improvement. The question: {question}",
         "answer_prefix": "Comment: ",
         "wrapper": 
         {
