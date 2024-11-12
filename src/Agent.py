@@ -1,13 +1,19 @@
-
-
 class Agent:
     def __init__(self, llm, instruction = ""):
         
         self.llm = llm
+
         self.instruction = instruction
         self.msg_history = []
+        self.reset_msg_history()
 
-        self.reset()
+        self.controller_info = {
+            "pn_pairs": [], # [ [pos1, neg1], [pos2, neg2], ...]
+            "layers_id": [], # [0, 1, 2, ...]
+            "coeff": 0.5,
+            "batch_size": 16
+            }
+        self.controller_activations = {}
 
     @property
     def instruction(self):
@@ -16,42 +22,53 @@ class Agent:
     @instruction.setter
     def instruction(self, instruction):
         self._instruction = instruction
-        self.reset()
+        self.reset_msg_history()
     
     @property
     def msgs(self):
         return self.msg_history 
     
-    def set_controller(self, controller):
-        #     pos_instrs = warp_config["pos_instrs"]
-        #     neg_instrs = warp_config["neg_instrs"]
-        #     activation_demons = warp_config["activation_demons"]
-        #     pn_pairs = list(zip(pos_instrs, neg_instrs))
+    @property
+    def controller_texts(self):
+        return self.controller_texts 
 
-        #     layer_id = warp_config["layer_id"]
-        #     coeff = warp_config["coeff"]
-        #     model = get_wrapped_model(model, tokenizer, pn_pairs, layer_id, coeff)
-        pass
+    def set_llm(self, llm):
+        self.llm = llm
+        if self.controller_activations:
+            self.set_controller_text(self.controller_info["pn_pairs"], self.controller_info["layers_id"], self.controller_info["coeff"], self.controller_info["batch_size"])
+    
+    def set_controller_text(self, pn_pairs, layers_id = [], coeff = 0.5, batch_size=16):
         
-    def reset(self):
+        if layers_id == []:
+            layers_id = list(range(self.llm.model.config.num_hidden_layers))
+            layers_id = layers_id[1:] # exclude the first layer
+
+        self.controller_info["pn_pairs"] = pn_pairs
+        self.controller_info["layers_id"] = layers_id
+        self.controller_info["coeff"] = coeff
+        self.controller_info["batch_size"] = batch_size
+
+        self.controller_activations = self.llm.get_controller_activations(pn_pairs, layers_id, coeff, batch_size)
+        
+    def reset_msg_history(self):
         self.msg_history = [{
                 "system_msg": self.instruction
             }]
         
-    def get_response(self, msg, reply_prefix  = ""):
+    def get_response(self, msg, reply_prefix  = "", max_length = 50):
         self.msg_history.append({
                 "user_msg": msg
             })
         
         formatted_prompt = self.llm.format_prompt(self.msg_history, reply_prefix)
-        texts = self.llm.get_response(formatted_prompt)
+        texts = self.llm.get_response(formatted_prompt, self.controller_activations, max_length = max_length)
         response = self.llm.extract_response(texts, reply_prefix)
 
         self.msg_history.append({
                 "assistant_msg": response
             })
 
-        return response
+        return texts, response
     
     def __str__(self):
         return f'Agent(instruction={self.instruction}, llm={self.llm})'

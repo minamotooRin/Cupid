@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>REPE</title>
+</head>
+
+<script>
+    async function submitForm(event) {
+        event.preventDefault();  // 阻止表单的默认提交行为
+
+        const sys = document.getElementById('sys').value;
+        const user = document.getElementById('user').value;
+        const PC = document.getElementById('PC').value;
+        const NV = document.getElementById('NC').value;
+        const slider = document.getElementById('slider').value;
+
+        // 准备数据
+        const data = {
+            sys: sys,
+            user: user,
+            PC: PC,
+            NC: NC,
+            slider: slider
+        };
+
+        try {
+            // 发送异步请求
+            const response = await fetch('/inference', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            // 解析 JSON 响应
+            const result = await response.json();
+
+            // 更新页面内容
+            document.getElementById('output').innerHTML = `
+                <h2>Output:</h2>
+                <p>${result.output}</p>
+            `;
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+</script>
+
+<body>
+    <h1>AAA</h1>
+    <form method="post">
+        <label for="System">System:</label><br>
+        <input type="text" id="sys" name="sys"><br>You are a Japanese undergraduate student. Please answer the following questions.<br>
+
+        <label for="User">User:</label><br>
+        <input type="text" id="user" name="user"><br>How do you feel abour Kyoto University?<br>
+
+        <label for="PC">Postive Case:</label><br>
+        <input type="text" id="PC" name="PC"><br>You are very happy<br>
+
+        <label for="NC">Negative Case:</label><br>
+        <input type="text" id="NC" name="NC"><br>You are very sad<br>
+
+        <label for="slider">Coefficient:</label><br>
+        <input type="range" id="slider" name="slider" min="0" max="10" value="1" oninput="sliderValue.value=value"><br>
+        <output id="sliderValue">1</output><br><br>
+
+        <input type="submit" value="Run">
+    </form>
+    <div id="output"></div>
+</body>
+</html>

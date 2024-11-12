@@ -1,12 +1,13 @@
 import torch
-import logging
-import tqdm
 import re
-import pathlib as pl
+import random
+import threading
 
-from transformers import AutoModelForCausalLM, AutoTokenizer
-
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+from repe import repe_pipeline_registry, WrappedReadingVecModel
 from abc import ABC, abstractmethod
+
+repe_pipeline_registry()
 
 class ModelPool:
     def __init__(self):
@@ -36,6 +37,10 @@ class LLM(ABC):
         self.model = AutoModelForCausalLM.from_pretrained(model_name).to(device)
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
 
+        # The WrappedReadingVecModel will affect the model's forward pass, so it should be used in a thread-safe way
+        self.wrapped_model = WrappedReadingVecModel(self.model, self.tokenizer)
+        self.lock = threading.Lock()
+
     @abstractmethod
     def format_prompt(self, prompt, assist_prefix):
         pass
@@ -43,16 +48,67 @@ class LLM(ABC):
     @abstractmethod
     def extract_response(self, output, assist_prefix):
         pass
+    
+    def get_controller_activations(self, pn_pairs, layers_id, coeff, batch_size):
+        rep_token = -1 # the last token is used for representation
+        hidden_layers = list(range(-1, -self.model.config.num_hidden_layers, -1))
+        n_difference = 1
+        direction_method = 'pca'
+        train_labels = []
+        for d in pn_pairs:
+            true_s = d[0]
+            random.shuffle(d)
+            train_labels.append([s == true_s for s in d])
 
-    def get_response(self, prompt):
+        with self.lock:
+            rep_reading_pipeline = pipeline("rep-reading", model=self.model, tokenizer=self.tokenizer)
+            rep_reading_pipeline.tokenizer.pad_token_id = self.model.config.eos_token_id
+            rep_reader = rep_reading_pipeline.get_directions(
+                pn_pairs, 
+                rep_token=rep_token, 
+                hidden_layers=hidden_layers, 
+                n_difference=n_difference, 
+                train_labels=train_labels, 
+                direction_method=direction_method,
+                batch_size=batch_size,
+            )
+
+        activations = {}
+
+        # import pdb; pdb.set_trace()
+
+        layer_num = self.model.config.num_hidden_layers
+
+        for layer in layers_id:
+            ind = layer - layer_num
+            activation = torch.tensor(coeff * rep_reader.directions[ind] * rep_reader.direction_signs[ind], dtype=self.model.dtype).to(self.model.device)
+            activations[layer] = activation
+
+        return activations
+    
+    def get_response(self, prompt, activations=None, max_length = 2000 ):
+
         inputs = self.tokenizer(prompt, return_tensors="pt").to(self.device)
-        self.model.eval()
-        with torch.no_grad():
-            outputs = self.model.generate(**inputs, do_sample = True, max_length=self.model.config.max_position_embeddings, pad_token_id=self.tokenizer.eos_token_id)
+
+        with self.lock:
+            if activations:
+                layers_id = list(activations.keys())
+                self.wrapped_model.wrap_block(layers_id, block_name="decoder_block")
+                self.wrapped_model.set_controller(layers_id, activations, masks=1)
+
+            self.wrapped_model.eval()
+            with torch.no_grad():
+                outputs = self.wrapped_model.generate(**inputs, do_sample = True, max_length=max_length, pad_token_id=self.tokenizer.eos_token_id)
+                
+            self.wrapped_model.unwrap()
+        
         texts = self.tokenizer.decode(outputs[0], skip_special_tokens=False)
+
         return texts
 
     def train(self, data_loader):
+
+        
         pass
 
     def evaluate(self, data_loader):
@@ -68,7 +124,7 @@ class LLM(ABC):
             self.model.save_pretrained(output_dir)
         
         self.tokenizer.save_pretrained(f'{output_dir}/{self.model_name}')
-    
+
     def __str__(self):
         return f'LLM(model={self.model_name})'
 
@@ -126,7 +182,6 @@ class LLaMA2(LLM):
         """
         #extract last model replay
         return output.split(f"[/INST] {assist_prefix}")[-1].split("[/INST]")[-1].strip()
-
 
 class LLaMA3(LLM):
     

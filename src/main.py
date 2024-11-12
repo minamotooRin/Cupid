@@ -4,7 +4,7 @@ import fire
 import json
 import logging
 
-from utils import *
+from utils import seed_everything, remove_extra_spaces
 from Agent import Agent
 from LLM import ModelPool
 from dataset_adapter import dataset_func
@@ -26,6 +26,14 @@ def main(
 
     agent_1 = Agent(model_pool[config_1["model_name"]])
     agent_2 = Agent(model_pool[config_2["model_name"]])
+
+    #     pos_instrs = warp_config["pos_instrs"]
+    #     neg_instrs = warp_config["neg_instrs"]
+    #     activation_demons = warp_config["activation_demons"]
+    #     pn_pairs = list(zip(pos_instrs, neg_instrs))
+
+    #     layer_id = warp_config["layer_id"]
+    #     coeff = warp_config["coeff"]
 
     questions, answers = dataset_func[config_dataset["dataset_name"]]()
 
