@@ -1,4 +1,6 @@
-# MultiAgent
+# Cupid
+
+Modify the pesonality of LLMs with Representation-engineering
 
 ## Installation
 
