@@ -22,19 +22,21 @@ class ModelPool:
     def __getitem__(self, model_name):
         return self.models[model_name]
 
-    def add_model(self, model_type, model_name, device):
+    def add_model(self, model_type, model_name, device, bf16 = False):
         if model_name in self.models:
             return
-        self.models[model_name] = self.type2class[model_type](model_name, device)
+        self.models[model_name] = self.type2class[model_type](model_name, device, bf16)
 
 
 class LLM(ABC):
-    def __init__(self, model_name, device = "cuda"):
+    def __init__(self, model_name, device = "cuda", bf16 = False):
         
         self.model_name = model_name
         self.device = device
 
         self.model = AutoModelForCausalLM.from_pretrained(model_name).to(device)
+        if bf16:
+            self.model = self.model.bfloat16()
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
 
         # The WrappedReadingVecModel will affect the model's forward pass, so it should be used in a thread-safe way
@@ -59,10 +61,11 @@ class LLM(ABC):
             true_s = d[0]
             random.shuffle(d)
             train_labels.append([s == true_s for s in d])
-
+            
         with self.lock:
             rep_reading_pipeline = pipeline("rep-reading", model=self.model, tokenizer=self.tokenizer)
             rep_reading_pipeline.tokenizer.pad_token_id = self.model.config.eos_token_id
+
             rep_reader = rep_reading_pipeline.get_directions(
                 pn_pairs, 
                 rep_token=rep_token, 
@@ -74,8 +77,6 @@ class LLM(ABC):
             )
 
         activations = {}
-
-        # import pdb; pdb.set_trace()
 
         layer_num = self.model.config.num_hidden_layers
 
@@ -133,9 +134,9 @@ class LLM(ABC):
     
 class LLaMA2(LLM):
         
-    def __init__(self, model_name, device = "cuda"):
+    def __init__(self, model_name, device = "cuda", bf16 = False):
         
-        super().__init__(model_name, device)
+        super().__init__(model_name, device, bf16)
 
     def format_prompt(self, msgs:list, assist_prefix:str=""):
         """
@@ -185,9 +186,9 @@ class LLaMA2(LLM):
 
 class LLaMA3(LLM):
     
-    def __init__(self, model_name, device = "cuda"):
+    def __init__(self, model_name, device = "cuda", bf16 = False):
         
-        super().__init__(model_name, device)
+        super().__init__(model_name, device, bf16)
 
     def format_prompt(self, msgs, assist_prefix:str=""):
         """

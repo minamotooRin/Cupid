@@ -1,5 +1,6 @@
 {
     "model_name": "meta-llama/Meta-Llama-3-8B-Instruct",
     "template_type":"LLaMA3",
-    "device": "cuda:0"
+    "device": "cuda:0",
+    "bf16": false
 }
