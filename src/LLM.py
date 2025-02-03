@@ -15,6 +15,7 @@ class ModelPool:
         self.type2class = {
             "LLaMA2": LLaMA2,
             "LLaMA3": LLaMA3,
+            "DeepSeek": DeepSeek,
         }
 
         self.models = {}
@@ -229,3 +230,57 @@ class LLaMA3(LLM):
         if matches:
             return matches[-1].strip()
         return None
+    
+
+class DeepSeek(LLM):
+    
+    def __init__(self, model_name, device = "cuda", bf16 = False):
+        
+        super().__init__(model_name, device, bf16)
+
+    def format_prompt(self, msgs, assist_prefix:str=""):
+        """ Deepseek output format:
+            "{system prompt}<｜User｜>hello<｜Assistant｜>hello<｜end▁of▁sentence｜>"
+        Note1: In the paper: A conversation between User and Assistant. The user asks a question, and the Assistant solves it. The assistant first thinks about the reasoning process in the mind and then provides the user with the answer. The reasoning process and answer are enclosed within <think> </think> and <answer> </answer> tags, respectively.<｜User｜>{user prompt}<｜Assistant｜<think>...</think> <answer>...</answer>｜end▁of▁sentence｜>
+        Note2: <｜begin▁of▁sentence｜> is the BOS token, which will processed automatically by the tokenizer
+        """
+        
+        user_msg_w_sys_template = """{system_msg}<｜User｜>{user_msg}"""
+
+        user_msg_template = """<｜User｜>{user_msg}"""
+
+        assistant_msg_template = """<｜Assistant｜>{assistant_msg}"""
+
+        if "system_msg" in msgs[0]:
+            prompt = user_msg_w_sys_template.format(system_msg=msgs[0]["system_msg"], user_msg=msgs[1]["user_msg"])
+            start_idx = 2
+        elif "user_msg" in msgs[0]:
+            prompt = user_msg_template.format(user_msg=msgs[0]["user_msg"])
+            start_idx = 1
+
+        for msg in msgs[start_idx:]:
+            if "user_msg" in msg:
+                prompt += user_msg_template.format(user_msg=msg["user_msg"])
+            elif "assistant_msg" in msg:
+                prompt += assistant_msg_template.format(assistant_msg=msg["assistant_msg"])
+
+        prompt += f"<｜end▁of▁sentence｜>"
+
+        # due to thinking, assist_prefix may not available in DeepSeek
+        if "user_msg" in msgs[-1]:
+            prompt += f"<｜Assistant｜>{assist_prefix}"
+
+        return prompt
+
+    def extract_response(self, output, assist_prefix:str=""):
+        """ Deepseek output format:
+            "{system prompt}<｜User｜>hello<｜Assistant｜>hello<｜end▁of▁sentence｜>"
+        """
+        #extract last model replay between "<｜Assistant｜>" and "<｜end▁of▁sentence｜>"
+        pattern = r"<\｜Assistant\｜>(.+?)<\｜end▁of▁sentence\｜>"
+        matches = re.findall(pattern, output, re.DOTALL)
+        if matches:
+            return matches[-1].strip()
+        return None
+
+
