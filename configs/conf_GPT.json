@@ -1,0 +1,11 @@
+{
+    "model":
+    {
+        "description":"just some memo here",
+        "model_name": "gpt-4o",
+        "template_type":"GPT",
+        "api_key": "",
+        "system_msg": "You are taking a personality test.\nAnswer on a 5-point scale:\n1 = Strongly Disagree\n2 = Disagree\n3 = Neutral\n4 = Agree\n5 = Strongly Agree\nPlease explain your reasoning step by step.\nThe output should be a JSON object ONLY with the following format:\n{\"reasoning\": ..., \"score\": 5-point scale}\"",
+        "answer_prefix": ""
+    }
+}

@@ -1,0 +1,12 @@
+{
+    "model":
+    {
+        "description":"just some memo here",
+        "model_name": "llava-hf/llava-interleave-qwen-7b-hf",
+        "template_type":"LLaVA",
+        "device": "cuda:0",
+        "bf16": true,
+        "system_msg": "",
+        "answer_prefix": ""
+    }
+}

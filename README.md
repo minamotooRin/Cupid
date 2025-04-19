@@ -1,7 +1,7 @@
 # Cupid
 
-Modify the pesonality of LLMs with Representation-engineering
+Modify the pesonality of LLMs
 
 ## Installation
 
-[repe](https://github.com/andyzoujm/representation-engineering) is required for this repo.
+<!-- [repe](https://github.com/andyzoujm/representation-engineering) is required for this repo. -->
