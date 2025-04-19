@@ -94,15 +94,6 @@ BFI_traits = [
     "Openness",
 ]
 
-UNIVERSAL_TRAITS = [
-    "Extraversion",
-    "Agreeableness",
-    "Conscientiousness",
-    "Emotional Stability",
-    "Openness",
-    "Honesty Humility",
-]
-
 class BFI(PsycoTest):
     def __init__(self):
         super().__init__()

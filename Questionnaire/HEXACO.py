@@ -74,15 +74,6 @@ HEXACO_traits = [
     "H"
 ]
 
-UNIVERSAL_TRAITS = [
-    "Extraversion",
-    "Agreeableness",
-    "Conscientiousness",
-    "Emotional Stability",
-    "Openness",
-    "Honesty Humility",
-]
-
 class HEXACO(PsycoTest):
     def __init__(self):
         super().__init__()

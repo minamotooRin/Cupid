@@ -1,3 +1,4 @@
+import json
 from abc import ABC, abstractmethod
 
 # universal_trait_mappings = {
@@ -53,6 +54,15 @@ from abc import ABC, abstractmethod
 #     }
 # }
 
+UNIVERSAL_TRAITS = [
+    "Extraversion",
+    "Agreeableness",
+    "Conscientiousness",
+    "Emotional Stability",
+    "Openness",
+    "Honesty Humility",
+]
+
 class PsycoTest(ABC):
     def __init__(self):
         self.questions = self.get_questions()
@@ -62,20 +72,40 @@ class PsycoTest(ABC):
     def __iter__(self):
         return iter(enumerate(self.questions, start=0))
 
-    def record_answer(self, question_no: int, answer):
-        if question_no < 0 or question_no >= len(self.questions):
+    def record_answer(self, question_no: int, answer: dict):
+        if question_no < 0 or question_no >= len(self.questions) or "score" not in answer:
             return
         self.answers[question_no] = answer
 
     def analyze(self):
         trait_scores = {}
         for q_no, ans in self.answers.items():
+            score = ans["score"]
             trait = self.traits_map.get(q_no)
             if trait is None:
                 continue
-            trait_scores.setdefault(trait, []).append(ans)
+            trait_scores.setdefault(trait, []).append(score)
         return {trait: sum(scores)/len(scores) for trait, scores in trait_scores.items()}
+    
+    def save_to_jsonl(self, filename: str):
+        with open(filename, 'w') as f:
+            for q_no, ans in self.answers.items():
+                data = {
+                    "question_no": q_no,
+                    "question": self.questions[q_no],
+                    "answer": ans
+                }
+                f.write(json.dumps(data) + '\n')
 
+    def load_from_jsonl(self, filename: str):
+        with open(filename, 'r') as f:
+            for line in f:
+                data = json.loads(line)
+                q_no = data["question_no"]
+                question = data["question"]
+                answer = data["answer"]
+                self.record_answer(q_no, answer)
+    
     @abstractmethod
     def get_questions(self) -> list:
         pass
