@@ -1,9 +1,8 @@
 import json
-from abc import ABC, abstractmethod
 import pandas as pd
+from pathlib import Path
 
-
-class IPIPTest(ABC):
+class IPIPTest():
     def __init__(self, multiple_item_table: pd.DataFrame, instrument: str):
         self.multiple_item_table = multiple_item_table
         self.instrument = instrument
@@ -24,7 +23,11 @@ class IPIPTest(ABC):
     def analyze(self):
         trait_scores = {}
         for q_no, ans in self.answers.items():
-            score = ans["score"]
+            try:
+                score = int(ans["score"])
+            except:
+                print(f"Invalid score for question {q_no}: {ans['score']}")
+                continue
             if self.key_label[q_no] < 0:
                 score = 6 - score
             trait = self.trait_label[q_no]
@@ -34,6 +37,7 @@ class IPIPTest(ABC):
         return {trait: sum(scores)/len(scores) for trait, scores in trait_scores.items()}
     
     def save_to_jsonl(self, filename: str):
+        Path(filename).parent.mkdir(parents=True, exist_ok=True)
         with open(filename, 'w') as f:
             for q_no, ans in self.answers.items():
                 data = {
