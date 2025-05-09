@@ -8,3 +8,11 @@ def clear_json(text):
     result = result.strip(", ")
     result = result.strip()
     return result
+
+abbr2lang = {
+    "DE": "German",
+    "ZH": "Chinese",
+    "JA": "Japanese",
+    "MN": "Mongolian",
+    "EN": "English",
+}
