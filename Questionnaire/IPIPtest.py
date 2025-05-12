@@ -38,7 +38,7 @@ class IPIPTest():
     
     def save_to_jsonl(self, filename: str):
         Path(filename).parent.mkdir(parents=True, exist_ok=True)
-        with open(filename, 'w') as f:
+        with open(filename, 'w', encoding="utf-8") as f:
             for q_no, ans in self.answers.items():
                 data = {
                     "question_no": q_no,
@@ -48,7 +48,7 @@ class IPIPTest():
                 f.write(json.dumps(data) + '\n')
 
     def load_from_jsonl(self, filename: str):
-        with open(filename, 'r') as f:
+        with open(filename, 'r', encoding="utf-8") as f:
             for line in f:
                 data = json.loads(line)
                 q_no = data["question_no"]
