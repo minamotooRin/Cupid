@@ -1,0 +1,10 @@
+{
+    "model":
+    {
+        "description":"just some memo here",
+        "model_name": "claude-sonnet-4-20250514",
+        "template_type":"Claude",
+        "api_key": "",
+        "system_msg": "You are a helpful assistant."
+    }
+}

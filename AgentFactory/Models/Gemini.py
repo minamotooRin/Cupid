@@ -3,13 +3,27 @@ import google.generativeai as genai
 
 from AgentFactory.Models.LLM import MLLM_remote
 
-def load_image(image_path):
-    # load image to mime_type="image/jpeg" and base64 encode
+def get_image_base64(path):
+    """
+    读取本地图片文件，返回 (base64_string, media_type)
+    例如: ("...base64...", "image/jpeg")
+    """
+    mime_type, _ = mimetypes.guess_type(path)
+    if mime_type is None:
+        ext = os.path.splitext(path)[1].lower()
+        if ext in ('.jpg', '.jpeg'):
+            mime_type = 'image/jpeg'
+        elif ext == '.png':
+            mime_type = 'image/png'
+        elif ext == '.gif':
+            mime_type = 'image/gif'
+        else:
+            mime_type = 'application/octet-stream'
 
-    with open(image_path, "rb") as image_file:
-        b64_image = base64.b64encode(image_file.read()).decode("utf-8")
+    with open(path, "rb") as f:
+        b64_str = base64.b64encode(f.read()).decode("utf-8")
 
-    return b64_image
+    return b64_str, mime_type
 
 def upload_to_gemini(path, mime_type=None):
     """
@@ -101,7 +115,8 @@ class Gemini(MLLM_remote):
             demon_user = []
             for content in msgs[it]["content"]:
                 if content["type"] == "image":
-                    demon_user.append({'mime_type':'image/jpeg', 'data': load_image(images[img_cnt])})
+                    base64_str, mime_type = get_image_base64(images[img_cnt])
+                    demon_user.append({'mime_type':mime_type, 'data': base64_str})
                     img_cnt += 1
                 elif content["type"] == "text":
                     demon_user.append({'text':content["text"]})
@@ -109,7 +124,8 @@ class Gemini(MLLM_remote):
             demon_assi = []
             for content in msgs[it + 1]["content"]:
                 if content["type"] == "image":
-                    demon_assi.append({'mime_type':'image/jpeg', 'data': load_image(images[img_cnt])})
+                    base64_str, mime_type = get_image_base64(images[img_cnt])
+                    demon_assi.append({'mime_type':mime_type, 'data': base64_str})
                     img_cnt += 1
                 elif content["type"] == "text":
                     demon_assi.append({'text':content["text"]})
@@ -122,7 +138,8 @@ class Gemini(MLLM_remote):
         query = []
         for content in msgs[-1]["content"]:
             if content["type"] == "image":
-                query.append({'mime_type':'image/jpeg', 'data': load_image(images[img_cnt])})
+                base64_str, mime_type = get_image_base64(images[img_cnt])
+                query.append({'mime_type':mime_type, 'data': base64_str})
                 img_cnt += 1
             elif content["type"] == "text":
                 query.append({'text':content["text"]})

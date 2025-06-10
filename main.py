@@ -1,4 +1,3 @@
-# %%
 import json
 import logging
 import pandas as pd 
@@ -14,7 +13,7 @@ from utils import clear_json, abbr2lang
 def main(
     config_path: str = "configs/conf_GPT.json",
     excel_dir: str = "IPIP/",
-    langs: str = ["DE", "ZH", "JA", "MN"],
+    langs: str = ["DE", "ZH", "JA", "MN", "EN"],
 ):
 
     logging.basicConfig(level=logging.WARNING)
